@@ -120,6 +120,30 @@ while running:
             enemy[0] = random.randint(0, screen_width - enemy_width)
             enemy[1] = random.randint(0, 200)
 
-    # Clear the screen
+
     screen.fill(black)
 
+    font = pygame.font.Font(None, 50)
+
+    title = font.render("SPACE INVADERS", True, white)
+    text_rect = title.get_rect(center=(screen_width//2, 30))
+    screen.blit(title, text_rect)
+
+    # Draw player, enemies, and bullet
+    pygame.draw.rect(screen, green, (player_x, player_y, player_width, player_height))
+    for enemy in enemies:
+        pygame.draw.rect(screen, white, (enemy[0], enemy[1], enemy_width, enemy_height))
+    if bullet_state == "fire":
+        pygame.draw.rect(screen, white, (bullet_x, bullet_y, bullet_width, bullet_height))
+    for bullet in enemy_bullets:
+        pygame.draw.rect(screen, white, (bullet[0], bullet[1], enemy_bullet_width, enemy_bullet_height)) 
+
+
+
+        # NEXT ADD SCORE KEEPER
+
+
+    pygame.display.update()
+
+# Quit Pygame
+pygame.quit()
