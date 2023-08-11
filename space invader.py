@@ -1,25 +1,22 @@
 import pygame
 import random
+import sys
+from pygame.locals import *
 
-#  Pygame
 pygame.init()
 
-#  dimensions
 screen_width = 800
 screen_height = 600
 
-# Colors
 white = (255, 255, 255)
 black = (0, 0, 0)
 green = (0, 255, 0)
 
-#  screen
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Space Invaders")
 
 
 
-# Player
 player_width = 20
 player_height = 20
 player_x = (screen_width - player_width) // 2
@@ -27,9 +24,6 @@ player_y = screen_height - player_height - 20
 player_speed = 1
 
 
-
-
-# Bullet
 bullet_width = 5
 bullet_height = 20
 bullet_x = 0
@@ -39,7 +33,6 @@ bullet_state = "ready"
 
 
 
-# Enemies 
 num_enemies = 5
 enemy_width = 17
 enemy_height = 17
@@ -50,6 +43,7 @@ enemy_bullet_height = 20
 enemy_bullet_speed = 1
 enemy_bullets = []
 
+restart_button_img = pygame.image.load('restart.png')
 
 
 enemy_speeds = [enemy_speed, -enemy_speed, enemy_speed, -enemy_speed, enemy_speed]
@@ -60,10 +54,28 @@ for i in range(num_enemies):
     enemies.append([random.randint(0, screen_width - enemy_width), random.randint(0, 200), enemy_speeds[i]])
 
 
+class Button():
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+restart_button_img = pygame.image.load('restart.png')
+restart_button = Button((screen_width - restart_button_img.get_width()) // 2, screen_height // 2, restart_button_img)
+
 score = 0
 
 running = True
 game_over = False
+
+
+
+
+
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -111,7 +123,7 @@ while running:
 
 
     for enemy in enemies:
-        if random.randint(0, 500) < 1: 
+        if random.randint(0, 50) < 1: 
             enemy_bullets.append([enemy[0] + enemy_width // 2 - enemy_bullet_width // 2, enemy[1] + enemy_height])
 
 
@@ -127,6 +139,9 @@ while running:
                 player_y < bullet[1] + enemy_bullet_height and player_y + player_height > bullet[1]):
             running = False      
             game_over = True
+
+
+
     if not game_over:
 
 
@@ -150,40 +165,42 @@ while running:
         for bullet in enemy_bullets:
             pygame.draw.rect(screen, white, (bullet[0], bullet[1], enemy_bullet_width, enemy_bullet_height)) 
     else:
-        screen.fill(black)
-        game_over_font = pygame.font.Font(None, 70)
-        game_over_text = game_over_font.render("Game Over", True, white)
-        game_over_rect = game_over_text.get_rect(center=(screen_width // 2, screen_height // 2))
-        screen.blit(game_over_text, game_over_rect)
+        while game_over:  
+            screen.fill(black)
+            game_over_font = pygame.font.Font(None, 70)
+            game_over_text = game_over_font.render("Game Over", True, white)
+            game_over_rect = game_over_text.get_rect(center=(screen_width // 2, screen_height // 2))
+            screen.blit(game_over_text, game_over_rect)
 
-        pygame.display.update()
-        pygame.time.delay(2000)
+            restart_button.draw(screen)
+            pygame.display.update()
 
-        play_again_font = pygame.font.Font(None, 40)
-        play_again_text = play_again_font.render("Play Again? (Y/N)", True, white)
-        play_again_rect = play_again_text.get_rect(center=(screen_width // 2, screen_height // 2 + 50))
-        screen.blit(play_again_text, play_again_rect)
-        pygame.display.update()
-
-        waiting_for_restart = True
-        while waiting_for_restart:
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1:
-                        game_over = False
-                        score = 0
-                        player_x = (screen_width - player_width) // 2
+                if event.type == pygame.QUIT:
+                    running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if restart_button.rect.collidepoing(event.pos):
+                        player_x = (screen_width-player_width)//2
                         player_y = screen_height - player_height - 20
+                        bullet_state = "ready"
                         enemies = []
                         for i in range(num_enemies):
                             enemies.append([random.randint(0, screen_width - enemy_width), random.randint(0, 200), enemy_speeds[i]])
-                        enemy_bullets.clear()
-                        waiting_for_restart = False
-                    elif event.key == pygame.K_n:
-                        running = False
-                        waiting_for_restart = False
+                        score = 0
+                        game_over = False                       
 
-            pygame.time.delay(250)
+
+
     pygame.display.update()
+    if game_over:
+        player_x = (screen_width - player_width) // 2
+        player_y = screen_height - player_height - 20
+        bullet_state = "ready"
+        enemies = []
+        for i in range(num_enemies):
+            enemies.append([random.randint(0, screen_width - enemy_width), random.randint(0, 200), enemy_speeds[i]])
+        score = 0 
+        game_over = False
+        pygame.time.delay(5000)
 
 pygame.quit()
